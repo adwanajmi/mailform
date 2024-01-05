@@ -28,6 +28,8 @@ class Scheduler extends Command
      */
     // public function handle()
     // {
+    //     $currentDateTime = now()->format('Y-m-d H:i:s');
+
     //     $this->info('Loading...');
 
     //     // Query untuk dapatkan pending case dan pending kat siapa
@@ -53,16 +55,21 @@ class Scheduler extends Command
     //         $user->USR_EMAIL = 'adwa.rosmadi@swmsb.com';
     //     }
 
+    //     dd($users);
+
     //     foreach ($users as $user) {
     //         Mail::to($user->USR_EMAIL)->send(new eFORMail($user));
     //     }
 
-    //     $this->info('Done.');
+    //     $this->info("Finished and sucessful: $currentDateTime");
 
     // }
 
     public function handle()
     {
+
+        $currentDateTime = now()->format('Y-m-d H:i:s');
+
         $this->info('Loading...');
 
         // Trigger email reminder lebih dari 3 hari
@@ -90,8 +97,8 @@ class Scheduler extends Command
             $user->USR_EMAIL = 'adwa.rosmadi@swmsb.com';
         }
 
-
         // dd($users);
+
         // Group users by their last name
         $groupedUsers = collect([]);
 
@@ -118,11 +125,11 @@ class Scheduler extends Command
         // dd($groupedUsers);
 
         foreach ($groupedUsers as $userData) {
-            // Use Mail facade to send an email
             Mail::to($userData->USR_EMAIL)->send(new eFORMail($userData));
         }
 
-        $this->info('Done.');
+        $this->info("Finished and sucessful: $currentDateTime");
+        // $this->info('Done.');
     }
 
 }

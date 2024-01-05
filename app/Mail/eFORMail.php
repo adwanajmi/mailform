@@ -34,7 +34,7 @@ class eFORMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'EMS System',
+            subject: 'EMS System - eDCN Pending Cases',
         );
     }
 
