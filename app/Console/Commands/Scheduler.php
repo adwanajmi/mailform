@@ -67,12 +67,7 @@ class Scheduler extends Command
 
     public function handle()
     {
-
-        $currentDateTime = now()->format('Y-m-d H:i:s');
-
         $this->info('Loading...');
-
-        // Trigger email reminder lebih dari 3 hari
 
         $users = DB::table('app_delegation')
             ->join('application', 'app_delegation.APP_NUMBER', '=', 'application.APP_NUMBER')
@@ -94,40 +89,26 @@ class Scheduler extends Command
             ->where('app_delegation.DEL_DELEGATE_DATE', '<', DB::raw('DATE_SUB(NOW(), INTERVAL 3 DAY)'))
             ->get();
 
-        foreach ($users as &$user) {
-            $user->USR_EMAIL = 'adwa.rosmadi@swmsb.com';
-        }
+        // foreach ($users as &$user) {
+        //     $user->USR_EMAIL = 'adwa.rosmadi@swmsb.com';
+        // }
 
-        // dd($users);
+        $groupedUsers = $users->groupBy('USR_LASTNAME');
 
-        $groupedUsers = collect([]);
+        $groupedUsers->each(function ($userGroup) {
+            $userData = (object) [
+                'USR_LASTNAME' => $userGroup->first()->USR_LASTNAME,
+                'USR_EMAIL' => $userGroup->first()->USR_EMAIL,
+                'APP_NUMBERS' => $userGroup->pluck('APP_NUMBER')->toArray(),
+                'DATES' => $userGroup->pluck('DEL_DELEGATE_DATE')->toArray(),
+                'TXT_DOCS' => $userGroup->pluck('TXT_DOC')->toArray(),
+            ];
 
-        foreach ($users as $user) {
-            $lastName = $user->USR_LASTNAME;
-
-            if (!$groupedUsers->has($lastName)) {
-                $groupedUsers[$lastName] = (object) [
-                    'USR_LASTNAME' => $lastName,
-                    'USR_EMAIL' => $user->USR_EMAIL,
-                    'APP_NUMBERS' => [],
-                    'DATES' => [],
-                    'TXT_DOCS' => [],
-                ];
-            }
-
-            $groupedUsers[$lastName]->APP_NUMBERS[] = $user->APP_NUMBER;
-            $groupedUsers[$lastName]->DATES[] = $user->DEL_DELEGATE_DATE;
-            $groupedUsers[$lastName]->TXT_DOCS[] = $user->TXT_DOC;
-        }
-
-        // dd($groupedUsers);
-
-        foreach ($groupedUsers as $userData) {
             Mail::to($userData->USR_EMAIL)->send(new eFORMail($userData));
-        }
+        });
 
-        $this->info("Finished and sucessful: $currentDateTime");
-        // $this->info('Done.');
+        $currentDateTime = now()->format('Y-m-d H:i:s');
+        $this->info("Finished and successful: $currentDateTime");
     }
 
 }

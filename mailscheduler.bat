@@ -1,0 +1,1 @@
+cd C:\Users\man010\eFORM && php artisan eform:run
