@@ -91,6 +91,7 @@ class Scheduler extends Command
             ->where('application.APP_STATUS', 'to_do')
             ->where('application.PRO_UID', '9181518555930bd3c5c17c3003883186')
             ->where('app_delegation.TAS_UID', '5616149905930bd3c738e27075412233')
+            ->where('app_delegation.DEL_DELEGATE_DATE', '<', DB::raw('DATE_SUB(NOW(), INTERVAL 3 DAY)'))
             ->get();
 
         foreach ($users as &$user) {
@@ -99,11 +100,9 @@ class Scheduler extends Command
 
         // dd($users);
 
-        // Group users by their last name
         $groupedUsers = collect([]);
 
         foreach ($users as $user) {
-            // Use the last name as the key for grouping
             $lastName = $user->USR_LASTNAME;
 
             if (!$groupedUsers->has($lastName)) {
@@ -116,7 +115,6 @@ class Scheduler extends Command
                 ];
             }
 
-            // Append data to the existing user group
             $groupedUsers[$lastName]->APP_NUMBERS[] = $user->APP_NUMBER;
             $groupedUsers[$lastName]->DATES[] = $user->DEL_DELEGATE_DATE;
             $groupedUsers[$lastName]->TXT_DOCS[] = $user->TXT_DOC;
